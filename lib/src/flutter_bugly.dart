@@ -19,29 +19,12 @@ class FlutterBugly {
     String androidAppId,
     String iOSAppId,
     String channel, //自定义渠道标识
-    bool autoCheckUpgrade = true,
-    bool autoInit = true,
-    bool autoDownloadOnWifi = false,
-    bool enableHotfix = false,
-    bool enableNotification = false, //未适配androidx
-    bool showInterruptedStrategy = true, //设置开启显示打断策略
-    bool canShowApkInfo = true, //设置是否显示弹窗中的apk信息
-    int initDelay = 0, //延迟初始化,单位秒
-    int upgradeCheckPeriod = 60, //升级检查周期设置,单位秒
   }) async {
     assert((Platform.isAndroid && androidAppId != null) ||
         (Platform.isIOS && iOSAppId != null));
     Map<String, Object> map = {
       "appId": Platform.isAndroid ? androidAppId : iOSAppId,
       "channel": channel,
-      "autoCheckUpgrade": autoCheckUpgrade,
-      "autoDownloadOnWifi": autoDownloadOnWifi,
-      "enableHotfix": enableHotfix,
-      "enableNotification": enableNotification,
-      "showInterruptedStrategy": showInterruptedStrategy,
-      "canShowApkInfo": canShowApkInfo,
-      "initDelay": initDelay,
-      "upgradeCheckPeriod": upgradeCheckPeriod,
     };
     final String result = await _channel.invokeMethod('initBugly', map);
     Map resultMap = json.decode(result);
@@ -84,31 +67,6 @@ class FlutterBugly {
       "value": value,
     };
     await _channel.invokeMethod('putUserData', map);
-  }
-
-  ///获取本地更新策略，即上次未更新的策略
-  static Future<UpgradeInfo> getUpgradeInfo() async {
-    final String result = await _channel.invokeMethod('getUpgradeInfo');
-    var info = _decodeUpgradeInfo(result);
-    return info;
-  }
-
-  ///检查更新
-  ///return 更新策略信息
-  static Future<UpgradeInfo> checkUpgrade({
-    bool isManual = false,
-    bool isSilence = false,
-    bool useCache = true,
-  }) async {
-    if (!Platform.isAndroid) return null;
-    Map<String, Object> map = {
-      "isManual": isManual, //用户手动点击检查，非用户点击操作请传false
-      "isSilence": isSilence, //是否显示弹窗等交互，[true:没有弹窗和toast] [false:有弹窗或toast]
-      "useCache": useCache, //是否使用第一次缓存的更新策略，false为实时的，但是bugly会可能返回null
-    };
-    final String result = await _channel.invokeMethod('checkUpgrade', map);
-    var info = _decodeUpgradeInfo(result);
-    return info;
   }
 
   ///异常上报
